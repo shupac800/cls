@@ -10,6 +10,7 @@ app.factory("getLatestFSPosts", function($q, $http) {
 
     for (i = 0; i < row.length; i++) {
       var title = row[i].querySelector("span #titletextonly").innerHTML;
+      var href = "http://nashville.craigslist.com" + row[i].querySelector("a").getAttribute("href");
       var datetime = row[i].querySelector("time").getAttribute("title");
       var price = row[i].querySelector("span .price");
       if (!price) {
@@ -26,6 +27,7 @@ app.factory("getLatestFSPosts", function($q, $http) {
       }
 
       cursor.push( {title:       title,
+                    href:        href,
                     datetime:    datetime,
                     price:       price,
                     loc:         loc       } );
