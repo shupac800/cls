@@ -1,0 +1,15 @@
+<div>
+  <h2>Showing Results</h2>
+  <input type="text" id="searchTerm" ng-model="searchTerm">
+
+  <div>
+    <table>
+      <tr ng-repeat="row in cursor | filter:myFilter">
+        <td>{{row.datetime}}</td>
+        <td><a href="{{row.href}}">{{row.title}}</a></td>
+        <td>{{row.price}}</td>
+        <td>{{row.loc}}</td>
+      </tr>
+    </table>
+  </div>
+</div>

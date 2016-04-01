@@ -9,18 +9,11 @@ app.config(['$routeProvider',  // $routeProvider object is given to us by ngRout
         controller: 'RootCtrl'
       }).
       when('/showResults', {
-        templateUrl: 'partials/showResults.html',
-        controller: 'showResultsCtrl'
-      }).
-      when('/searchYour', {
-        templateUrl: 'partials/search-your.html',
-        controller: 'SearchYourCtrl'
-      }).
-      when('/login', {
-        templateUrl: 'partials/login.html',
-        controller: 'LoginCtrl'
+        templateUrl: 'partials/show-results.html',
+        controller: 'ShowResultsCtrl'
       }).
       otherwise({
         redirectTo: '/'
       });
-  }]);
+  }
+]);

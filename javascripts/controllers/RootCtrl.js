@@ -1,11 +1,8 @@
-app.controller("RootCtrl", ["$scope","getLatestFSPosts",
-  function($scope) {
+app.controller("RootCtrl", ["$scope","$location",
+  function($scope,$location) {
     console.log("RootCtrl is running");
     $scope.searchCL = function() {
-      console.log("searching for",$scope.searchTerm);
-      getLatestFSPosts();
+      $location.url("/showResults");
     };
-
-
   }
 ]);

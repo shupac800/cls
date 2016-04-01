@@ -1,7 +1,7 @@
 app.factory("getLatestFSPosts", function($q, $http) {
 
 
-    function loadCursor(rawHTML) {
+  function loadCursor(rawHTML) {
     var cursor = [];
     // cursor is array that contains title, datetime, href, price, location
     // first three fields are guaranteed to be populated; last two are not
@@ -34,25 +34,26 @@ app.factory("getLatestFSPosts", function($q, $http) {
     return cursor;
   }
 
-  function getFSPage() {
-    return $q(function(resolve, reject) {
-      $http.get("https://cors-anywhere.herokuapp.com/http://nashville.craigslist.org/search/sss")
-      .then(
-        function(response) {
-          var rawHTML = response.data;
-          console.log("read rawHTML from CL");
-          //console.log(rawHTML);
-          cursor = loadCursor(rawHTML);
-          console.log(cursor);
-          resolve(cursor);
-        },
-        function(error) {
-          console.log("fuck!!");
-          reject(error);
-        }
-      );
-    });
+  return {
+    load: function() {
+      return $q(function(resolve, reject) {
+        $http.get("https://cors-anywhere.herokuapp.com/http://nashville.craigslist.org/search/sss")
+        .then(
+          function(response) {
+            var rawHTML = response.data;
+            console.log("read rawHTML from CL");
+            //console.log(rawHTML);
+            cursor = loadCursor(rawHTML);
+            console.log(cursor);
+            resolve(cursor);
+          },
+          function(error) {
+            console.log("fuck!!");
+            reject(error);
+          }
+        );
+      });
+    }
   }
 
-  return getFSPage();  // factory returns this Promise to any controller
 });
