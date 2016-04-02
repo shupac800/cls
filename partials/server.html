@@ -1,0 +1,19 @@
+<div>
+  <h2>CL Flunky</h2>
+  <h3>server runs as long as this page is open!</h3>
+  <button ng-click="addSearch()">Add Search</button>
+  <div>
+    <table>
+      <tr ng-repeat="search in searches">
+        <td>{{search.user}}</td>
+        <td>{{search.city}}</td>
+        <td>{{search.searchterm}}</td>
+        <td>{{search.filter}}</td>
+        <td>{{search.phone}}</td>
+        <td>{{search.interval}}</td>
+        <td>{{search.lastsearch}}</td>
+        <td>{{search.msgs-sent}}</td>
+      </tr>
+    </table>
+  </div>
+</div>
