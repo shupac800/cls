@@ -5,14 +5,16 @@
   <div>
     <table>
       <tr ng-repeat="search in searches">
-        <td>{{search.user}}</td>
-        <td>{{search.city}}</td>
-        <td>{{search.searchterm}}</td>
-        <td>{{search.filter}}</td>
-        <td>{{search.phone}}</td>
-        <td>{{search.interval}}</td>
-        <td>{{search.lastsearch}}</td>
-        <td>{{search.msgs-sent}}</td>
+        <td ng-click="editCell($event)">{{search.user}}</td>
+        <td ng-click="editCell($event)">{{search.city}}</td>
+        <td ng-click="editCell($event)">{{search.searchterm}}</td>
+        <td ng-click="editCell($event)">{{search.filter}}</td>
+        <td ng-click="editCell($event)">{{search.phone}}</td>
+        <td ng-click="editCell($event)">{{search.interval}}</td>
+        <td ng-click="editCell($event)">{{search.hcreated}}</td>
+        <td ng-click="editCell($event)">{{search.hlastsearch}}</td>
+        <td ng-click="editCell($event)">{{search.msgs-sent}}</td>
+        <td><input type="text" ng-keyup="gotKey($event)">
       </tr>
     </table>
   </div>
