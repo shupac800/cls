@@ -10,7 +10,7 @@ app.factory("getLatestFSPosts", function($q, $http) {
 
     for (i = 0; i < row.length; i++) {
       var title = row[i].querySelector("span #titletextonly").innerHTML;
-      var href = "http://nashville.craigslist.com" + row[i].querySelector("a").getAttribute("href");
+      var href = "http://sfbay.craigslist.com" + row[i].querySelector("a").getAttribute("href");
       var datetime = row[i].querySelector("time").getAttribute("title");
       var price = row[i].querySelector("span .price");
       if (!price) {
@@ -36,10 +36,11 @@ app.factory("getLatestFSPosts", function($q, $http) {
     return cursor;
   }
 
+  // factory must return something
   return {
     load: function() {
       return $q(function(resolve, reject) {
-        $http.get("https://cors-anywhere.herokuapp.com/http://nashville.craigslist.org/search/sss")
+        $http.get("https://cors-anywhere.herokuapp.com/http://sfbay.craigslist.org/search/sss")
         .then(
           function(response) {
             var rawHTML = response.data;

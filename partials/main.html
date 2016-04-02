@@ -1,7 +1,7 @@
 <div>
-  <h2>Showing Results</h2>
+  <h2>CLS</h2>
   search for: <input type="text" id="searchTerm" ng-model="searchTerm">
-  <button ng-click="fetchResults">Search</button>
+  <button ng-click="fetchResults()">Search</button>
   <div>
     <table>
       <tr ng-repeat="row in cursor | filter:myFilter">
