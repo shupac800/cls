@@ -4,18 +4,20 @@
   <button ng-click="addSearch()">Add Search</button>
   <div>
     <table>
-      <tr ng-repeat="search in searches">
-        <td ng-click="editCell($event)">{{search.user}}</td>
-        <td ng-click="editCell($event)">{{search.city}}</td>
-        <td ng-click="editCell($event)">{{search.searchterm}}</td>
-        <td ng-click="editCell($event)">{{search.filter}}</td>
-        <td ng-click="editCell($event)">{{search.phone}}</td>
-        <td ng-click="editCell($event)">{{search.interval}}</td>
-        <td ng-click="editCell($event)">{{search.hcreated}}</td>
-        <td ng-click="editCell($event)">{{search.hlastsearch}}</td>
-        <td ng-click="editCell($event)">{{search.msgs-sent}}</td>
-        <td><input type="text" ng-keyup="gotKey($event)">
-      </tr>
+      <tbody id="searches">
+<!--       <tr ng-repeat="search in searches">
+  <td class="key" ng-click="editCell($event)">{{search.key}}</td>
+  <td class="user" ng-click="editCell($event)">{{search.user}}</td>
+  <td class="city" ng-click="editCell($event)">{{search.city}}</td>
+  <td class="searchterm" ng-click="editCell($event)">{{search.searchterm}}</td>
+  <td class="filter" ng-click="editCell($event)">{{search.filter}}</td>
+  <td class="phone" ng-click="editCell($event)">{{search.phone}}</td>
+  <td class="interval" ng-click="editCell($event)">{{search.interval}}</td>
+  <td class="hcreated" ng-click="editCell($event)">{{search.hcreated}}</td>
+  <td class="hlastsearch" ng-click="editCell($event)">{{search.hlastsearch}}</td>
+  <td class="msgs-sent" ng-click="editCell($event)">{{search.msgs-sent}}</td>
+</tr> -->
+      </tbody>
     </table>
   </div>
 </div>
