@@ -3,8 +3,10 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
 
     //global to this controller
     var editing = false;
-    previousRow = "";
-    previousEvent = "";
+    var previousRow = "";
+    var previousCellNode = "";
+    var previousEvent = "";
+    var previousCellHTML = "";
 
     console.log("ServerCtrl is running");
 
@@ -60,12 +62,12 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
 
 
     $scope.patchField = function(e) {
-      var id = $(e.currentTarget).parent().parent().attr("id");
-      var field = $(e.currentTarget).parent().attr("field");
+      var id = $(e.currentTarget).parent().attr("id");
+      console.log(e.currentTarget.classList);
+      var field = e.currentTarget.classList[0];
       console.log("patching field " + field + " of",`http://cls.firebaseio.com/${id}.json`);
       var newObj = {};
       newObj[field] = $scope.editText;
-      return;
       $http.patch(
         `https://cls.firebaseio.com/${id}.json`,
         JSON.stringify(newObj)
@@ -81,27 +83,30 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       if (editing) {  // if we were already editing a cell
         if (!$scope.editText) {  // were the cell contents unchanged?
           // restore original cell contents
-          //var id = $(e.currentTarget).parent().attr("id");
-          //console.log("row id is ",id);
           $(`tr#${previousRow} td p`).show();
           $(`tr#${previousRow} td input`).remove();
+          previousCellHTML = "";
+          $scope.editText = "";
         } else {
           $scope.patchField(previousEvent);  // treat click on new cell as "enter" on previous cell
-          $("td.ng-scope").replaceWith(`<td>${$scope.editText}</td>`);  // replace input box with new text
-          // add listener to cell
+          $(previousCellNode).html($scope.editText);  // replace old <p> text with new
+          $(`tr#${previousRow} td input`).remove();
+          $(previousCellNode).show();
+          $scope.editText = "";
         }
       }
       editing = true;
       console.log("clicked on",e.currentTarget.classList[0]);
       console.log("e.currentTarget is ",e.currentTarget);
-      console.log("e.currentTarget children are ",$(e.currentTarget).children("p")[0].innerHTML);
       var field = e.currentTarget.classList[0];
       previousRow = $(e.currentTarget).parent().attr("id");
       previousEvent = e;
-      previousCellHTML = $(e.currentTarget).children("p")[0].innerHTML;
-      var el = $compile(`<input type='text' field='${field}' autofocus=true placeholder='${previousCellHTML}' ng-model='editText' ng-keyup='$event.which === 13 && patchField($event)'>`)($scope);
+      previousCellNode = $(e.currentTarget).children("p")[0];
+      previousCellHTML = previousCellNode.innerHTML;
+      var el = $compile(`<input type='text' field='${field}' placeholder='${previousCellHTML}' ng-model='editText' ng-keyup='$event.which === 13 && patchField($event)'>`)($scope);
       $(e.currentTarget).children("p")[0].setAttribute("style","display:none");
       $(e.currentTarget).append(el);
+      e.currentTarget.querySelector("input").focus();
       // hide old text, show input box!
     }
 
