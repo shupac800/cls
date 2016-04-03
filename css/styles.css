@@ -4,11 +4,13 @@ tbody tr:nth-child(odd) {
 
 table {
   margin: 20px;
-  border: 1px solid red;
+  font-family: monospace;
+  font-size: 1.2em;
 }
 
 td {
   border: 1px solid gray;
+  text-align: center;
 }
 
 td.delete {
@@ -18,4 +20,8 @@ td.delete {
 td.delete img {
   height: 15px;
   width: 15px;
+}
+
+tr#headerRow {
+  font-weight: bold;
 }

@@ -4,42 +4,48 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
     console.log("ServerCtrl is running");
     //$("body:not(td)").on("click",nonTDClick);
 
-    $http.get("http://cls.firebaseio.com/.json")
-    .then(
-      function(response) {
-        console.log("read from Firebase:",response.data);
-        $("tbody#searches").append("<tr>" +
-                           "<td>user</td>" +
-                           "<td>city</td>" +
-                           "<td>searchterm</td>"+
-                           "<td>filter</td>" +
-                           "<td>phone</td>" +
-                           "<td>interval</td>" +
-                           "<td>created</td>" +
-                           "<td>lastsearch</td>" +
-                           "<td>messages</td>" +
-                           "<td>delete</td>" +
-                           "</tr>" );
-        Object.keys(response.data).forEach(function(thisKey) {
-          response.data[thisKey].hcreated = response.data[thisKey].created;
-          response.data[thisKey].hlastsearch = response.data[thisKey].lastsearch;
-          // if (typeof response.data[thisKey].hlastsearch === typeof undefined) {
-          //   response.data[thisKey].hlastsearch = "never";
-          // }
-          response.data[thisKey].key = thisKey;
-          displayRow(response.data,thisKey);
-        });
-      },
-      function(error) {
-        console.log("something went awry");
-      }
-    );
+    fetchSearchData();
+    //test();
 
-    test();
 
     function test() {
     
     }
+
+
+    function fetchSearchData() {
+      $http.get("http://cls.firebaseio.com/.json")
+      .then(
+        function(response) {
+          console.log("read from Firebase:",response.data);
+          $("tbody#searches").append("<tr id='headerRow'>" +
+                             "<td>user</td>" +
+                             "<td>city</td>" +
+                             "<td>searchterm</td>"+
+                             "<td>filter</td>" +
+                             "<td>phone</td>" +
+                             "<td>interval</td>" +
+                             "<td>created</td>" +
+                             "<td>lastsearch</td>" +
+                             "<td>messages</td>" +
+                             "<td>delete</td>" +
+                             "</tr>" );
+          Object.keys(response.data).forEach(function(thisKey) {
+            response.data[thisKey].hcreated = response.data[thisKey].created;
+            response.data[thisKey].hlastsearch = response.data[thisKey].lastsearch;
+            // if (typeof response.data[thisKey].hlastsearch === typeof undefined) {
+            //   response.data[thisKey].hlastsearch = "never";
+            // }
+            response.data[thisKey].key = thisKey;
+            displayRow(response.data,thisKey);
+          });
+        },
+        function(error) {
+          console.log("something went awry; couldn't load search data from Firebase");
+        }
+      );
+    }
+
 
     function displayRow(obj,thisKey) {
       $("tbody#searches").append(`<tr id='${thisKey}'>`);
@@ -54,8 +60,8 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       $(rowSelector).append("<td class='hlastsearch'><p>" + obj[thisKey].hlastsearch +"</p></td>");
       $(rowSelector).append("<td class='msgs_sent'><p>" + obj[thisKey].msgs_sent +"</p></td>");
       $(rowSelector).append("<td class='delete'><p>X</p></td>");
-
       $(rowSelector).append("</tr>")
+
       // add listeners to fields that can be edited
       $(`tr#${thisKey} td.user`).on("click",tdClick);
       $(`tr#${thisKey} td.city`).on("click",tdClick);
@@ -70,6 +76,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       $(`tr#${thisKey} td.delete`).on("click",deleteRow);
     }
 
+
     function deleteRow(e) {
       var id = $(e.currentTarget).parent().attr("id");
       $http.delete(`https://cls.firebaseio.com/${id}.json`)
@@ -83,9 +90,11 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       });
     }
 
+
     function formatTime(time) {
 
     }
+
 
     function nonTDClick(e) {
       console.log("non td click");
@@ -96,9 +105,9 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       return;
     }
 
+
     function tdClick(e) {
       console.log("td click");
-      console.log("currentTarget",e.currentTarget);
       // are we clicking on a td that has an input in it?
       var tdInputNode = e.currentTarget.querySelector("input");
       console.log("tdInputNode",tdInputNode);
@@ -115,7 +124,6 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
           console.log("detected previousCellNode truthy");
           // was any new text entered into that input box?
           if (($scope.editText === "") || ($scope.editText === previousCellNode.querySelector("p").innerHTML)) {  // no change?
-            console.log("closing");
             closePreviousCellNode(previousCellNode);
           } else {  // cell contents were changed
             // patch FB with changed cell contents
@@ -123,7 +131,6 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
             patchField(previousCellNode);
             // update <p> contents of previousCellNode with contents of input box
             $(previousCellNode).find("p").text($scope.editText);
-            console.log("closing");
             closePreviousCellNode(previousCellNode);
           }
         } else {
@@ -159,10 +166,8 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       console.log("running closePreviousCellNode");
       // remove input box from previousCellNode
       previousCellNode.querySelector("input").remove();
-      //$(previousCellNode).find("input").remove();
       // unhide <p> in previousCellNode
       previousCellNode.querySelector("p").setAttribute("style","display:inline");
-      //$(previousCellNode).find("p").show();
     }
 
 
@@ -178,7 +183,6 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
         console.log("patch successful");
       }).error(function() {
         console.log("something went awry; patch unsuccessful");
-        // restore previous cell text
       });
     }
 
@@ -186,7 +190,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
     $scope.addSearch = function() {
       var newObj = {        "user": "",
                             "city": "",
-                            "created": Math.floor(Date.now() / 1000),
+                            "created": Math.floor(Date.now() / 1000),  // divide JS time by 1000 to get UNIX time
                             "filter": "",
                             "interval": "",
                             "lastsearch": "never",
@@ -203,7 +207,6 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
           displayRow(objForDisplay,response.name);
         }).error(function(error) {
           console.log("something went awry; post unsuccessful");
-          // remove new row from DOM
         });
     }  // end addSearch
 
