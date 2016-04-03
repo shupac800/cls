@@ -1,5 +1,7 @@
 app.factory("getLatestFSPosts", function($q, $http,dataService) {
 
+  var searchData = dataService.getSearchData();  // get parameters from dataService factory
+
 
   function loadCursor(rawHTML) {
     var cursor = [];
@@ -10,7 +12,7 @@ app.factory("getLatestFSPosts", function($q, $http,dataService) {
 
     for (i = 0; i < row.length; i++) {
       var title = row[i].querySelector("span #titletextonly").innerHTML;
-      var href = `http://${searchData.city}.craigslist.com` + row[i].querySelector("a").getAttribute("href");
+      var href = `http://${searchData.city}.craigslist.org` + row[i].querySelector("a").getAttribute("href");
       var datetime = row[i].querySelector("time").getAttribute("title");
       var price = row[i].querySelector("span .price");
       if (!price) {
@@ -32,13 +34,10 @@ app.factory("getLatestFSPosts", function($q, $http,dataService) {
                     price:       price,
                     loc:         loc       } );
     }
-    //console.log(cursor);
     return cursor;
   }
 
-  var searchData = dataService.getSearchData();  // get parameters from dataService factory
 
-  // factory must return something
   return {
     load: function() {
       return $q(function(resolve, reject) {
@@ -46,14 +45,11 @@ app.factory("getLatestFSPosts", function($q, $http,dataService) {
         .then(
           function(response) {
             var rawHTML = response.data;
-            console.log("read rawHTML from CL");
-            //console.log(rawHTML);
             cursor = loadCursor(rawHTML);
-            //console.log(cursor);
             resolve(cursor);
           },
           function(error) {
-            console.log("fuck!!");
+            console.log("uh-oh");
             reject(error);
           }
         );
