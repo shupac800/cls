@@ -9,6 +9,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
     var previousCellHTML = "";
 
     console.log("ServerCtrl is running");
+    //$("body:not(td)").on("click",nonTDClick);
 
     $http.get("http://cls.firebaseio.com/.json")
     .then(
@@ -40,28 +41,122 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       }
     );
 
+    test();
+
+    function test() {
+    
+    }
+
     function displayRow(obj,thisKey) {
       $("tbody#searches").append(`<tr id='${thisKey}'>`);
       var rowSelector = "tr#" + thisKey;
-      $(rowSelector).append("<td class='user'><p>" + obj[thisKey].user +"</td></p>");
-      $(rowSelector).append("<td class='city'><p>" + obj[thisKey].city +"</td></p>");
-      $(rowSelector).append("<td class='searchterm'><p>" + obj[thisKey].searchterm +"</td></p>");
-      $(rowSelector).append("<td class='filter'><p>" + obj[thisKey].filter +"</td></p>");
-      $(rowSelector).append("<td class='phone'><p>" + obj[thisKey].phone +"</td></p>");
-      $(rowSelector).append("<td class='interval'><p>" + obj[thisKey].interval +"</td></p>");
-      $(rowSelector).append("<td class='hcreated'><p>" + obj[thisKey].hcreated +"</td></p>");
-      $(rowSelector).append("<td class='hlastsearch'><p>" + obj[thisKey].hlastsearch +"</td></p>");
-      $(rowSelector).append("<td class='msgs_sent'><p>" + obj[thisKey].msgs_sent +"</td></p>");
+      $(rowSelector).append("<td class='user'><p>" + obj[thisKey].user +"</p></td>");
+      $(rowSelector).append("<td class='city'><p>" + obj[thisKey].city +"</p></td>");
+      $(rowSelector).append("<td class='searchterm'><p>" + obj[thisKey].searchterm +"</p></td>");
+      $(rowSelector).append("<td class='filter'><p>" + obj[thisKey].filter +"</p></td>");
+      $(rowSelector).append("<td class='phone'><p>" + obj[thisKey].phone +"</p></td>");
+      $(rowSelector).append("<td class='interval'><p>" + obj[thisKey].interval +"</p></td>");
+      $(rowSelector).append("<td class='hcreated'><p>" + obj[thisKey].hcreated +"</p></td>");
+      $(rowSelector).append("<td class='hlastsearch'><p>" + obj[thisKey].hlastsearch +"</p></td>");
+      $(rowSelector).append("<td class='msgs_sent'><p>" + obj[thisKey].msgs_sent +"</p></td>");
+      $(rowSelector).append("<td class='delete'><p></p></td>");
+
       $(rowSelector).append("</tr>")
-      $(`tr#${thisKey} td`).on("click",editCell);
+      $(`tr#${thisKey} td`).on("click",tdClick);
     }
 
     function formatTime(time) {
 
     }
 
+    function nonTDClick(e) {
+      console.log("non td click");
+      var previousCellNode = checkForOpenInput();
+      if (previousCellNode) {
+        closePreviousCellNode(previousCellNode);
+      }
+      return;
+    }
 
-    $scope.patchField = function(e) {
+    function tdClick(e) {
+      console.log("td click");
+      console.log("currentTarget",e.currentTarget);
+      // are we clicking on a td that has an input in it?
+      var tdInputNode = e.currentTarget.querySelector("input");
+      console.log("tdInputNode",tdInputNode);
+      if (tdInputNode) {  // if so
+        console.log("tdInputNode is true");
+        $(tdInputNode).focus();  // input box in this td gets focus
+        return;  // do nothing else
+      } else {  // we clicked on a td with no input box in it
+        console.log("did not click on td with input in it");
+        // are there any other open input boxes in the table?
+        console.log("cfoi returns",checkForOpenInput());
+//weird flow here...
+        var previousCellNode = checkForOpenInput();  // PROBLEM IS RIGHT HERE.... WHAT'S GOING ON
+        //console.log("previousCellNode"),previousCellNode;
+        if (previousCellNode) {  // found an open input box in the table
+          console.log("detected previousCellNode truthy");
+          // was any new text entered into that input box?
+          console.log("scope.editText",$scope.editText);
+          console.log("previous cell text",previousCellNode.querySelector("p").innerHTML);
+          if ($scope.editText === previousCellNode.querySelector("p").innerHTML) {  // no change?
+            console.log("closing");
+            closePreviousCellNode(previousCellNode);
+          } else {  // cell contents were changed
+            // patch FB with changed cell contents
+            console.log("patching firebase with new text: ",$scope.editText);
+            // update <p> contents of previousCellNode with contents of input box
+            $(previousCellNode).find("p").text($scope.editText);
+            console.log("closing");
+            closePreviousCellNode(previousCellNode);
+          }
+        } else {
+          console.log("detected previousCellNode falsy");
+        }
+      }
+      // hide <p> node
+      e.currentTarget.querySelector("p").setAttribute("style","display:none");
+      // open a new input box
+      console.log("new input");
+      $(e.currentTarget).append(`<input type='text' ng-model='editText' placeholder='${e.currentTarget.querySelector("p").innerHTML}'>`);
+    }
+
+
+    function checkForOpenInput() {
+      // is there an input box open somewhere in the table?
+      var openInputNode = document.getElementsByTagName("tbody")[0].querySelectorAll("input")[0];
+      if (openInputNode) {  // found one?
+        console.log("found open input somewhwere in table");
+        var previousCellNode = $(openInputNode).parent()[0];  // parent of input box becomes "previousCellNode"
+        console.log("its parent is",previousCellNode);
+        return previousCellNode;
+      } else {  // there was no open input box in the table?
+        console.log("found no open input box anywhere in table");
+        return "";
+      }
+    }
+
+
+    function closePreviousCellNode(previousCellNode) {
+      console.log("running closePreviousCellNode");
+      // remove input box from previousCellNode
+      previousCellNode.querySelector("input").remove();
+      //$(previousCellNode).find("input").remove();
+      // unhide <p> in previousCellNode
+      previousCellNode.querySelector("p").setAttribute("style","display:inline");
+      //$(previousCellNode).find("p").show();
+      return;
+    }
+
+
+    $scope.OLDpatchField = function(e) {
+      console.log(e.keyCode);
+      if (e.keyCode !== 13 &&     // enter key
+          e.keyCode !== 9 ) {     // tab key
+        return;
+      }
+
       var id = $(e.currentTarget).parent().attr("id");
       console.log(e.currentTarget.classList);
       var field = e.currentTarget.classList[0];
@@ -74,23 +169,25 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       )
       .then(
         () => console.log("patch successful"),      // Handle resolve
-        (response) => console.log(response)  // Handle reject
+        (response) => console.log(response)        // Handle reject
       );
       editing = false;  // reset global flag
     }
 
-    function editCell(e) {
+/*    function OLDeditCell(e) {
       if (editing) {  // if we were already editing a cell
+        // was it this cell?  ( click on input field)
         if (!$scope.editText) {  // were the cell contents unchanged?
           // restore original cell contents
           $(`tr#${previousRow} td p`).show();
           $(`tr#${previousRow} td input`).remove();
           previousCellHTML = "";
           $scope.editText = "";
-        } else {
+        } else {  // cell contents were changed, so write the patch
+          previousEvent.keyCode = 13;  // fake a press on the "enter" key
           $scope.patchField(previousEvent);  // treat click on new cell as "enter" on previous cell
           $(previousCellNode).html($scope.editText);  // replace old <p> text with new
-          $(`tr#${previousRow} td input`).remove();
+          $(`tr#${previousRow} td input`).remove();  // remove the input box
           $(previousCellNode).show();
           $scope.editText = "";
         }
@@ -103,12 +200,11 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       previousEvent = e;
       previousCellNode = $(e.currentTarget).children("p")[0];
       previousCellHTML = previousCellNode.innerHTML;
-      var el = $compile(`<input type='text' field='${field}' placeholder='${previousCellHTML}' ng-model='editText' ng-keyup='$event.which === 13 && patchField($event)'>`)($scope);
+      var el = $compile(`<input type='text' field='${field}' placeholder='${previousCellHTML}' ng-model='editText' ng-keyup='patchField($event)'>`)($scope);
       $(e.currentTarget).children("p")[0].setAttribute("style","display:none");
       $(e.currentTarget).append(el);
       e.currentTarget.querySelector("input").focus();
-      // hide old text, show input box!
-    }
+    }*/
 
 
     $scope.addSearch = function() {
