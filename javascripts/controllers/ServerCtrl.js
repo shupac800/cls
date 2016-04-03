@@ -82,9 +82,8 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       $http.delete(`https://cls.firebaseio.com/${id}.json`)
       .success(function(){
         console.log("delete successful");
-        /////////// ****************** !!!!!!!!!!!!!!!!!!!!!
-        // update DOM -- remove deleted row using remove()
-        /////////// ****************** !!!!!!!!!!!!!!!!!!!!!
+        // remove deleted row from the DOM
+        $(`tr#${id}`).remove();
       }).error(function() {
         console.log("something went awry; delete unsuccessful");
       });
@@ -204,6 +203,9 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
           console.log("new key is ",response.name);
           var objForDisplay = {};
           objForDisplay[response.name] = newObj;
+          objForDisplay[response.name].hcreated = objForDisplay[response.name].created;
+          objForDisplay[response.name].hlastsearch = objForDisplay[response.name].lastsearch;
+          console.log("objForDisplay",objForDisplay);
           displayRow(objForDisplay,response.name);
         }).error(function(error) {
           console.log("something went awry; post unsuccessful");

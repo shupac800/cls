@@ -25,3 +25,9 @@ td.delete img {
 tr#headerRow {
   font-weight: bold;
 }
+
+input {
+  font-family: monospace;
+  font-size: 1em;
+  max-width: 100px;
+}
