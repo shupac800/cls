@@ -10,3 +10,12 @@ table {
 td {
   border: 1px solid gray;
 }
+
+td.delete {
+  text-align: center;
+}
+
+td.delete img {
+  height: 15px;
+  width: 15px;
+}

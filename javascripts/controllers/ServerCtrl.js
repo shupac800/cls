@@ -1,13 +1,6 @@
 app.controller("ServerCtrl", ["$scope","$http","$compile",
   function($scope,$http,$compile) {
 
-    //global to this controller
-    var editing = false;
-    var previousRow = "";
-    var previousCellNode = "";
-    var previousEvent = "";
-    var previousCellHTML = "";
-
     console.log("ServerCtrl is running");
     //$("body:not(td)").on("click",nonTDClick);
 
@@ -25,13 +18,14 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
                            "<td>created</td>" +
                            "<td>lastsearch</td>" +
                            "<td>messages</td>" +
+                           "<td>delete</td>" +
                            "</tr>" );
         Object.keys(response.data).forEach(function(thisKey) {
-          response.data[thisKey].hcreated = new Date(response.data[thisKey].created * 1000);
-          response.data[thisKey].hlastsearch = new Date(response.data[thisKey].lastsearch * 1000);
-          if (typeof response.data[thisKey] === typeof undefined) {
-            response.data[thisKey].hlastsearch = "never";
-          }
+          response.data[thisKey].hcreated = response.data[thisKey].created;
+          response.data[thisKey].hlastsearch = response.data[thisKey].lastsearch;
+          // if (typeof response.data[thisKey].hlastsearch === typeof undefined) {
+          //   response.data[thisKey].hlastsearch = "never";
+          // }
           response.data[thisKey].key = thisKey;
           displayRow(response.data,thisKey);
         });
@@ -59,10 +53,34 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       $(rowSelector).append("<td class='hcreated'><p>" + obj[thisKey].hcreated +"</p></td>");
       $(rowSelector).append("<td class='hlastsearch'><p>" + obj[thisKey].hlastsearch +"</p></td>");
       $(rowSelector).append("<td class='msgs_sent'><p>" + obj[thisKey].msgs_sent +"</p></td>");
-      $(rowSelector).append("<td class='delete'><p></p></td>");
+      $(rowSelector).append("<td class='delete'><p>X</p></td>");
 
       $(rowSelector).append("</tr>")
-      $(`tr#${thisKey} td`).on("click",tdClick);
+      // add listeners to fields that can be edited
+      $(`tr#${thisKey} td.user`).on("click",tdClick);
+      $(`tr#${thisKey} td.city`).on("click",tdClick);
+      $(`tr#${thisKey} td.searchterm`).on("click",tdClick);
+      $(`tr#${thisKey} td.filter`).on("click",tdClick);
+      $(`tr#${thisKey} td.phone`).on("click",tdClick);
+      $(`tr#${thisKey} td.interval`).on("click",tdClick);
+
+      // add "delete" graphic to delete field
+      $(`tr#${thisKey} td.delete`).html(`<img src="redx.png">`);
+      // add listener to "delete" field
+      $(`tr#${thisKey} td.delete`).on("click",deleteRow);
+    }
+
+    function deleteRow(e) {
+      var id = $(e.currentTarget).parent().attr("id");
+      $http.delete(`https://cls.firebaseio.com/${id}.json`)
+      .success(function(){
+        console.log("delete successful");
+        /////////// ****************** !!!!!!!!!!!!!!!!!!!!!
+        // update DOM -- remove deleted row using remove()
+        /////////// ****************** !!!!!!!!!!!!!!!!!!!!!
+      }).error(function() {
+        console.log("something went awry; delete unsuccessful");
+      });
     }
 
     function formatTime(time) {
@@ -96,9 +114,6 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
         if (previousCellNode) {  // found an open input box in the table
           console.log("detected previousCellNode truthy");
           // was any new text entered into that input box?
-          console.log("scope.editText",$scope.editText);
-          console.log("previous cell text",previousCellNode.querySelector("p").innerHTML);
-          // HAVING PROBLEMS BINDING INPUT TEXT TO $SCOPE.EDITTEXT
           if (($scope.editText === "") || ($scope.editText === previousCellNode.querySelector("p").innerHTML)) {  // no change?
             console.log("closing");
             closePreviousCellNode(previousCellNode);
@@ -152,57 +167,20 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
 
 
     function patchField(cellNode) {
-
-
-/////// OK TIME TO PUT THIS PATCH CODE INTO EFFECT /////////////////////////
       var id = $(cellNode).parent().attr("id");
       //console.log(cellNode.classList);
       var field = cellNode.classList[0];
       console.log("patching field " + field + " of",`http://cls.firebaseio.com/${id}.json`);
       var newObj = {};
       newObj[field] = $scope.editText;
-      $http.patch(
-        `https://cls.firebaseio.com/${id}.json`,
-        JSON.stringify(newObj)
-      )
-      .then(
-        () => console.log("patch successful"),      // Handle resolve
-        (response) => console.log(response)        // Handle reject
-      );
-      editing = false;  // reset global flag
+      $http.patch(`https://cls.firebaseio.com/${id}.json`,JSON.stringify(newObj))
+      .success(function() {
+        console.log("patch successful");
+      }).error(function() {
+        console.log("something went awry; patch unsuccessful");
+        // restore previous cell text
+      });
     }
-
-/*    function OLDeditCell(e) {
-      if (editing) {  // if we were already editing a cell
-        // was it this cell?  ( click on input field)
-        if (!$scope.editText) {  // were the cell contents unchanged?
-          // restore original cell contents
-          $(`tr#${previousRow} td p`).show();
-          $(`tr#${previousRow} td input`).remove();
-          previousCellHTML = "";
-          $scope.editText = "";
-        } else {  // cell contents were changed, so write the patch
-          previousEvent.keyCode = 13;  // fake a press on the "enter" key
-          $scope.patchField(previousEvent);  // treat click on new cell as "enter" on previous cell
-          $(previousCellNode).html($scope.editText);  // replace old <p> text with new
-          $(`tr#${previousRow} td input`).remove();  // remove the input box
-          $(previousCellNode).show();
-          $scope.editText = "";
-        }
-      }
-      editing = true;
-      console.log("clicked on",e.currentTarget.classList[0]);
-      console.log("e.currentTarget is ",e.currentTarget);
-      var field = e.currentTarget.classList[0];
-      previousRow = $(e.currentTarget).parent().attr("id");
-      previousEvent = e;
-      previousCellNode = $(e.currentTarget).children("p")[0];
-      previousCellHTML = previousCellNode.innerHTML;
-      var el = $compile(`<input type='text' field='${field}' placeholder='${previousCellHTML}' ng-model='editText' ng-keyup='patchField($event)'>`)($scope);
-      $(e.currentTarget).children("p")[0].setAttribute("style","display:none");
-      $(e.currentTarget).append(el);
-      e.currentTarget.querySelector("input").focus();
-    }*/
 
 
     $scope.addSearch = function() {
@@ -216,14 +194,19 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
                             "phone": "",
                             "reported": [],
                             "searchterm": "" };
-      $http.post("https://cls.firebaseio.com/.json", JSON.stringify(newObj))
+      $http.post("https://cls.firebaseio.com/.json",JSON.stringify(newObj))
         .success(function(response) {
-            console.log("post successful");
-            console.log("new key is ",response.name);
-            var objForDisplay = {};
-            objForDisplay[response.name] = newObj;
-            displayRow(objForDisplay,response.name);
-        }).error(function(error) {});
+          console.log("post successful");
+          console.log("new key is ",response.name);
+          var objForDisplay = {};
+          objForDisplay[response.name] = newObj;
+          displayRow(objForDisplay,response.name);
+        }).error(function(error) {
+          console.log("something went awry; post unsuccessful");
+          // remove new row from DOM
+        });
     }  // end addSearch
+
+
   }
 ]);
