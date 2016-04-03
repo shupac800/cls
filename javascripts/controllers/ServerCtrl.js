@@ -91,21 +91,21 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       } else {  // we clicked on a td with no input box in it
         console.log("did not click on td with input in it");
         // are there any other open input boxes in the table?
-        console.log("cfoi returns",checkForOpenInput());
-//weird flow here...
-        var previousCellNode = checkForOpenInput();  // PROBLEM IS RIGHT HERE.... WHAT'S GOING ON
+        var previousCellNode = checkForOpenInput();
         //console.log("previousCellNode"),previousCellNode;
         if (previousCellNode) {  // found an open input box in the table
           console.log("detected previousCellNode truthy");
           // was any new text entered into that input box?
           console.log("scope.editText",$scope.editText);
           console.log("previous cell text",previousCellNode.querySelector("p").innerHTML);
-          if ($scope.editText === previousCellNode.querySelector("p").innerHTML) {  // no change?
+          // HAVING PROBLEMS BINDING INPUT TEXT TO $SCOPE.EDITTEXT
+          if (($scope.editText === "") || ($scope.editText === previousCellNode.querySelector("p").innerHTML)) {  // no change?
             console.log("closing");
             closePreviousCellNode(previousCellNode);
           } else {  // cell contents were changed
             // patch FB with changed cell contents
-            console.log("patching firebase with new text: ",$scope.editText);
+            //console.log("patching firebase with new text: ",$scope.editText);
+            patchField(previousCellNode);
             // update <p> contents of previousCellNode with contents of input box
             $(previousCellNode).find("p").text($scope.editText);
             console.log("closing");
@@ -119,7 +119,9 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       e.currentTarget.querySelector("p").setAttribute("style","display:none");
       // open a new input box
       console.log("new input");
-      $(e.currentTarget).append(`<input type='text' ng-model='editText' placeholder='${e.currentTarget.querySelector("p").innerHTML}'>`);
+      $(e.currentTarget).append($compile(`<input type='text' placeholder='${e.currentTarget.querySelector("p").innerHTML}' ng-model='editText'>`)($scope));
+      $scope.editText = "";
+      e.currentTarget.querySelector("input").focus();
     }
 
 
@@ -146,20 +148,16 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       // unhide <p> in previousCellNode
       previousCellNode.querySelector("p").setAttribute("style","display:inline");
       //$(previousCellNode).find("p").show();
-      return;
     }
 
 
-    $scope.OLDpatchField = function(e) {
-      console.log(e.keyCode);
-      if (e.keyCode !== 13 &&     // enter key
-          e.keyCode !== 9 ) {     // tab key
-        return;
-      }
+    function patchField(cellNode) {
 
-      var id = $(e.currentTarget).parent().attr("id");
-      console.log(e.currentTarget.classList);
-      var field = e.currentTarget.classList[0];
+
+/////// OK TIME TO PUT THIS PATCH CODE INTO EFFECT /////////////////////////
+      var id = $(cellNode).parent().attr("id");
+      //console.log(cellNode.classList);
+      var field = cellNode.classList[0];
       console.log("patching field " + field + " of",`http://cls.firebaseio.com/${id}.json`);
       var newObj = {};
       newObj[field] = $scope.editText;
