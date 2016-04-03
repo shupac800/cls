@@ -1,5 +1,5 @@
-app.controller("ServerCtrl", ["$scope","$http","$compile",
-  function($scope,$http,$compile) {
+app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$location",
+  function($scope,$http,$compile,dataService,$location) {
 
     console.log("ServerCtrl is running");
     //$("body:not(td)").on("click",nonTDClick);
@@ -29,6 +29,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
                              "<td>lastsearch</td>" +
                              "<td>messages</td>" +
                              "<td>delete</td>" +
+                             "<td>search now</td>" +
                              "</tr>" );
           Object.keys(response.data).forEach(function(thisKey) {
             response.data[thisKey].hcreated = response.data[thisKey].created;
@@ -59,7 +60,8 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       $(rowSelector).append("<td class='hcreated'><p>" + obj[thisKey].hcreated +"</p></td>");
       $(rowSelector).append("<td class='hlastsearch'><p>" + obj[thisKey].hlastsearch +"</p></td>");
       $(rowSelector).append("<td class='msgs_sent'><p>" + obj[thisKey].msgs_sent +"</p></td>");
-      $(rowSelector).append("<td class='delete'><p>X</p></td>");
+      $(rowSelector).append("<td class='delete'><p></p></td>");
+      $(rowSelector).append("<td class='searchnow'><p></p></td>");
       $(rowSelector).append("</tr>")
 
       // add listeners to fields that can be edited
@@ -71,9 +73,26 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
       $(`tr#${thisKey} td.interval`).on("click",tdClick);
 
       // add "delete" graphic to delete field
-      $(`tr#${thisKey} td.delete`).html(`<img src="redx.png">`);
+      $(`tr#${thisKey} td.delete`).html("<img src='redx.png'>");
       // add listener to "delete" field
       $(`tr#${thisKey} td.delete`).on("click",deleteRow);
+
+      // add "search" graphic to search field
+      $(`tr#${thisKey} td.searchnow`).html("<img src='Search.png'>");
+      // add listener to "search" field
+      $(`tr#${thisKey} td.searchnow`).on("click",function(){
+        console.log("searchnow click");
+        // store search parameters in dataService factory
+        dataService.setSearchData( $(`tr#${thisKey} td.searchterm`).text(),
+                                   $(`tr#${thisKey} td.city`).text(),
+                                   $(`tr#${thisKey} td.filter`).text(),
+                                   $(`tr#${thisKey} td.phone`).text(),
+                                   $(`tr#${thisKey} td.interval`).text(),
+                                   $(`tr#${thisKey} td.msgs_sent`).text() );
+        //console.log("retrieved from factory:",dataService.getScopeData());
+        $location.url("/main");  // switch view
+        $scope.$apply();  // not sure why this is necessary, but it is
+      });
     }
 
 
@@ -195,7 +214,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile",
                             "lastsearch": "never",
                             "msgs_sent": 0,
                             "phone": "",
-                            "reported": [],
+                            "reported": [-1],  // contains one dummy value so it'll show up in FB
                             "searchterm": "" };
       $http.post("https://cls.firebaseio.com/.json",JSON.stringify(newObj))
         .success(function(response) {
