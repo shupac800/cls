@@ -1,7 +1,9 @@
 <div>
   <h2>CL Flunky</h2>
-  <h3>displaying search results for "{{searchterm}}"</h3>
-  <h3>filtered by "{{filter}}"</h3>
+  <h3>displaying last 100 for-sale posts from {{city}}.craigslist.org</h3>
+  <button ng-click="jumpToAdminView()">Return to Admin View</button>
+<!--   <h3>displaying search results for "{{searchterm}}"</h3>
+<h3>filtered by "{{filter}}"</h3> -->
   <div>
     <table>
       <tr ng-repeat="row in cursor">

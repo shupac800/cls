@@ -13,6 +13,12 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
     }
 
 
+    $scope.jumpToShowResults = function() {
+      $location.url("/main");
+      $scope.$apply();
+    }
+
+
     function fetchSearchData() {
       $http.get("http://cls.firebaseio.com/.json")
       .then(
@@ -94,8 +100,6 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
                                    $(`tr#${thisKey} td.interval`).text(),
                                    $(`tr#${thisKey} td.msgsSent`).text() );
         //console.log("retrieved from factory:",dataService.getScopeData());
-        //$location.url("/main");  // switch view
-        //$scope.$apply();  // not sure why this is necessary, but it is
         $scope.fetchResults(thisKey);  // gets results, sends text, schedules next search
       });
 

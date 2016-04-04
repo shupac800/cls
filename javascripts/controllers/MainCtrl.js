@@ -1,5 +1,5 @@
-app.controller("MainCtrl", ["$scope","getLatestFSPosts","dataService",
-  function($scope,getLatestFSPosts,dataService) {
+app.controller("MainCtrl", ["$scope","getLatestFSPosts","dataService","$location",
+  function($scope,getLatestFSPosts,dataService,$location) {
     console.log("MainCtrl is running");
     var searchData = dataService.getSearchData();  // get parameters from dataService factory
 
@@ -11,13 +11,7 @@ app.controller("MainCtrl", ["$scope","getLatestFSPosts","dataService",
     $scope.fetchResults = function() {
       getLatestFSPosts.load().then(
         function(cursor) {
-          cursor = cursor.filter(function(cRow) {
-            return ( cRow.title.toLowerCase().match( searchData.searchterm.toLowerCase() ) 
-                   && !( cRow.title.toLowerCase().match( searchData.filter.toLowerCase() ) ) );
-          });
-          $scope.cursor = cursor;  // display results
-          // if item ID isn't in the "reported" array,
-          // do Twilio REST thing for each thing in the cursor
+          $scope.cursor = cursor;  // display unfiltered results
         },
         function (error) {
           console.log("something went awry, couldn't load results from CL");
@@ -25,8 +19,14 @@ app.controller("MainCtrl", ["$scope","getLatestFSPosts","dataService",
       );
     }
 
-    $scope.searchterm = searchData.searchterm;
-    $scope.filter = searchData.filter;
+    $scope.jumpToAdminView = function() {
+      $location.url("/");
+      $scope.$apply();
+    }
+
+    // $scope.searchterm = searchData.searchterm;
+    // $scope.filter = searchData.filter;
+    $scope.city = searchData.city;
     $scope.fetchResults();
   }
 ]);

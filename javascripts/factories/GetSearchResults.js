@@ -8,6 +8,7 @@ app.factory("getLatestFSPosts", function($q, $http,dataService) {
     // cursor is array that contains title, datetime, href, price, location
     // first three fields are guaranteed to be populated; last two are not
     var row = $(rawHTML).find(".row");
+    console.log("got " + row.length + "rows from CL as raw HTML");
 
     for (i = 0; i < row.length; i++) {
       var title = row[i].querySelector("span #titletextonly").innerHTML;
@@ -40,11 +41,13 @@ app.factory("getLatestFSPosts", function($q, $http,dataService) {
   return {
     load: function() {
       return $q(function(resolve, reject) {
+        console.log("doing CORS request");
         $http.get(`https://cors-anywhere.herokuapp.com/http://${searchData.city}.craigslist.org/search/sss`)
         .then(
           function(response) {
             var rawHTML = response.data;
             cursor = loadCursor(rawHTML);
+            console.log("I just put this shit in the cursor:",cursor);
             resolve(cursor);
           },
           function(error) {
