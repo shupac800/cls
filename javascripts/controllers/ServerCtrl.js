@@ -13,7 +13,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
     }
 
 
-    $scope.jumpToShowResults = function() {
+    $scope.jumpToShowResultsView = function() {
       $location.url("/main");
       $scope.$apply();
     }
@@ -75,6 +75,10 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       $(rowSelector).append("<td class='nextsearch_conv'><p>N/S</p></td>");
       $(rowSelector).append("</tr>")
 
+      if (obj[thisKey].lastsearch === "never") {
+        $(`tr#${thisKey} td.lastsearch_conv`).text("never");
+      }
+
       // add listeners to fields that can be edited
       $(`tr#${thisKey} td.user`).on("click",tdClick);
       $(`tr#${thisKey} td.city`).on("click",tdClick);
@@ -128,11 +132,13 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       return 
     }
 
+
     function postponeSearch(key) {
       console.log("clearing timeout with id",$scope.timeoutID);
       clearTimeout($scope.timeoutID);
       $(`tr#${key} td.nextsearch_conv`).css("background-color","yellow");
     }
+
 
     function unPostponeSearch(key) {
       var intervalInSeconds = parseInt($(`tr#${key} td.nextsearch`).text()) - Math.floor(Date.now() / 1000);
@@ -160,11 +166,6 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       }).error(function() {
         console.log("something went awry; delete unsuccessful");
       });
-    }
-
-
-    function formatTime(time) {
-
     }
 
 
@@ -292,6 +293,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
         h = hh,
         min = ('0' + d.getMinutes()).slice(-2),   // Add leading 0.
         ampm = 'AM',
+        dayIndex = d.getDay(),
         time;
           
       if (hh > 12) {
@@ -305,7 +307,10 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       }
       
       // ie: 2013-02-18, 8:35 AM  
-      time = yyyy + '-' + mm + '-' + dd + ', ' + h + ':' + min + ' ' + ampm;
+      var dayOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      var month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      time = dayOfWeek[dayIndex] + " " + dd + " " + month[mm - 1] + ", " + h + ":" + min + " " + ampm;
+      //time = yyyy + '-' + mm + '-' + dd + ', ' + h + ':' + min + ' ' + ampm;
         
       return time;
     }

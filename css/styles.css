@@ -59,7 +59,3 @@ td.lastsearch, td.created, td.nextsearch {
     -webkit-animation-iteration-count: 1;
     -webkit-animation-timing-function: ease-out;
 }
-
-.msgsSent {
-  background-color: #3FC;
-}
