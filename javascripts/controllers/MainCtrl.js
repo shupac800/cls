@@ -20,8 +20,8 @@ app.controller("MainCtrl", ["$scope","getLatestFSPosts","dataService","$location
     }
 
     $scope.jumpToAdminView = function() {
-      $location.url("/");
-      $scope.$apply();
+      $location.url("/server");
+      //$scope.$apply();
     }
 
     // $scope.searchterm = searchData.searchterm;

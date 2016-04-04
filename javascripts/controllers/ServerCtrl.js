@@ -22,7 +22,9 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       $http.get("http://cls.firebaseio.com/.json")
       .then(
         function(response) {
-          console.log("read from Firebase:",response.data);
+          console.log("response from fb:",response.data);
+          $scope.account_sid = response.data.credentials.account_sid;
+          $scope.auth_token = response.data.credentials.auth_token;
           $("tbody#searches").append("<tr id='headerRow'>" +
                              "<td>user</td>" +
                              "<td>city</td>" +
@@ -38,9 +40,8 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
                              "<td>next search</td>" +
                              "</tr>" );
           // display one row for each search saved in Firebase
-          Object.keys(response.data).forEach(function(thisKey) {
-            response.data[thisKey].key = thisKey;
-            displayRow(response.data,thisKey);
+          Object.keys(response.data.searches).forEach(function(thisKey) {
+            displayRow(response.data.searches,thisKey);
           });
         },
         function(error) {
@@ -153,7 +154,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
 
     function deleteRow(e) {
       var id = $(e.currentTarget).parent().attr("id");
-      $http.delete(`https://cls.firebaseio.com/${id}.json`)
+      $http.delete(`https://cls.firebaseio.com/searches/${id}.json`)
       .success(function(){
         console.log("delete successful");
         // remove deleted row from the DOM
@@ -169,7 +170,6 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       e.stopImmediatePropagation();
       // do we have an input box open?
       var nodeWithInput = checkForOpenInput();
-      console.log("nodeWithInput",nodeWithInput);
       if (!nodeWithInput) {  // no input box is open, so there's nothing to close
         return false;
       }
@@ -247,31 +247,31 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
         case "searchterm":
           // is search term blank or all whitespace?
           if (isEmpty(inputText)) {
-            reportErrorToDOM("Search term cannot be left blank");
+            reportErrorToDOM(cellNode,"Search term cannot be left blank");
             return false;
           }
           return true;
         case "phone":
           if (inputText.length !== 10) {
-            reportErrorToDOM("Phone number must be 10 digits");
+            reportErrorToDOM(cellNode,"Phone number must be 10 digits");
             return false;
           }
           if ((inputText.charAt(0) === "0") || (inputText.charAt(0) === "1")) {
-            reportErrorToDOM("Valid 10-digit phone number cannot begin with 0 or 1");
+            reportErrorToDOM(cellNode,"Valid 10-digit phone number cannot begin with 0 or 1");
             return false;
           }
           return true;
         case "interval":
           if (!parseInt(inputText) >= 1) {
-            reportErrorToDOM("Interval must be 1 or more");
+            reportErrorToDOM(cellNode,"Interval must be 1 or more");
             return false;
           }
           if (parseInt(inputText) < 0) {
-            reportErrorToDOM("Interval can't be less than 1");
+            reportErrorToDOM(cellNode,"Interval can't be less than 1");
             return false;
           }
           if (parseInt(inputText) !== parseFloat(inputText)) {
-            reportErrorToDOM("Interval must be a round number, no decimals");
+            reportErrorToDOM(cellNode,"Interval must be a round number, no decimals");
             return false;
           }
         default:
@@ -285,9 +285,11 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
     }
 
 
-    function reportErrorToDOM(message) {
+    function reportErrorToDOM(cellNode,message) {
+      var offset = $(cellNode).offset();
       console.log("error:",message);
       $("div.container").append("<div id='error'><p></p><button>OK</button></div>");
+      $("div#error").css("top",offset.top + 7).css("left",offset.left + 7);
       $("div#error p").text(message);
       $("div#error button").on("click",function() {
         $("div#error").remove();
@@ -323,7 +325,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       var field = cellNode.classList[0];
       var newObj = {};
       newObj[field] = $(cellNode).text();
-      $http.patch(`https://cls.firebaseio.com/${id}.json`,JSON.stringify(newObj))
+      $http.patch(`https://cls.firebaseio.com/searches/${id}.json`,JSON.stringify(newObj))
       .success(function() {
         console.log("Firebase patch successful");
       }).error(function() {
@@ -341,9 +343,9 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
                             "lastsearch": "never",
                             "msgsSent": 0,
                             "phone": "555555555",
-                            "reported": [-1],  // contains one dummy value so it'll show up in Firebase
-                            "searchterm": "???" };
-      $http.post("https://cls.firebaseio.com/.json",JSON.stringify(newObj))
+                            //"reported": [-1],  // contains one dummy value so it'll show up in Firebase
+                            "searchterm": "<none>" };
+      $http.post("https://cls.firebaseio.com/searches/.json",JSON.stringify(newObj))
         .success(function(response) {
           console.log("post successful");
           console.log("new key is ",response.name);
@@ -455,10 +457,11 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       console.log("message is ",message);
       $.ajax({
         type: "POST",
-        headers: {"Authorization": "Basic " + btoa("ACda875cca4cfd121417e0d744cb52d000" + ":" + "3c6a196d2930ad0779cc7ec78ecee18b")},
-        username: "ACda875cca4cfd121417e0d744cb52d000",
-        password: "3c6a196d2930ad0779cc7ec78ecee18b",
-        url: "https://api.twilio.com/2010-04-01/Accounts/ACda875cca4cfd121417e0d744cb52d000/Messages",
+        //headers: {"Authorization": "Basic " + btoa("ACda875cca4cfd121417e0d744cb52d000" + ":" + "3c6a196d2930ad0779cc7ec78ecee18b")},
+        headers: {"Authorization": "Basic " + btoa($scope.account_sid + ":" + $scope.auth_token)},
+        username: $scope.account_sid,
+        password: $scope.auth_token,
+        url: `https://api.twilio.com/2010-04-01/Accounts/${$scope.account_sid}/Messages`,
         data: {
           "To" : "+1" + $(`tr#${key} td.phone`).text(),
           "From" : "+12019032712",
