@@ -1,6 +1,5 @@
 app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$location","getLatestFSPosts",
   function($scope,$http,$compile,dataService,$location,getLatestFSPosts) {
-
     console.log("ServerCtrl is running");
     //$("body:not(td)").on("click",nonTDClick);
 
@@ -212,10 +211,21 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       // hide <p> node
       e.currentTarget.querySelector("p").setAttribute("style","display:none");
       // open a new input box
-      console.log("new input");
       $(e.currentTarget).append($compile(`<input type='text' placeholder='${e.currentTarget.querySelector("p").innerHTML}' ng-model='editText'>`)($scope));
       $scope.editText = "";
       e.currentTarget.querySelector("input").focus();
+      $(e.currentTarget).on("keypress",function(ke) {
+        if (ke.keyCode === 13) {
+          ke.stopImmediatePropagation();  // prevents "double keypress" bug
+          if ($scope.editText) {  // did we enter anything in the input box?
+            // update <p> contents of previousCellNode with contents of input box
+            $(e.currentTarget).find("p").text($scope.editText);
+            // patch Firebase with changed cell contents
+            patchField(e.currentTarget);
+          }
+          closePreviousCellNode(e.currentTarget);
+        }
+      });
     }
 
 
@@ -235,7 +245,6 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
 
 
     function closePreviousCellNode(previousCellNode) {
-      console.log("running closePreviousCellNode");
       // remove input box from previousCellNode
       previousCellNode.querySelector("input").remove();
       // unhide <p> in previousCellNode
@@ -250,7 +259,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       newObj[field] = $(cellNode).text();
       $http.patch(`https://cls.firebaseio.com/${id}.json`,JSON.stringify(newObj))
       .success(function() {
-        console.log("patch successful");
+        console.log("Firebase patch successful");
       }).error(function() {
         console.log("something went awry; patch unsuccessful");
       });
@@ -283,6 +292,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
         });
     }  // end addSearch
 
+
     // from https://gist.github.com/kmaida/6045266
     function convertTimestamp(timestamp) {
       var d = new Date(timestamp * 1000), // Convert the passed timestamp to milliseconds
@@ -307,10 +317,10 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       }
       
       // ie: 2013-02-18, 8:35 AM  
+      //time = yyyy + '-' + mm + '-' + dd + ', ' + h + ':' + min + ' ' + ampm;
       var dayOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       var month = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       time = dayOfWeek[dayIndex] + " " + dd + " " + month[mm - 1] + ", " + h + ":" + min + " " + ampm;
-      //time = yyyy + '-' + mm + '-' + dd + ', ' + h + ':' + min + ' ' + ampm;
         
       return time;
     }
@@ -338,6 +348,10 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
             /////////////////////////////////////////
             ///////////////// DO REPORTED ARRAY CHECK
             /////////////////////////////////////////
+            // note: you don't really have to do an array check unless
+            // you're running a very short interval, or
+            // you're scraping a forsale page that isn't frequently updated
+
             // do Twilio REST thing for each thing in the cursor
             var message = city + " CL alert: " + cRow.title;
             twilio(key,message);
@@ -404,7 +418,6 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
         }
       });
     }
-
   }
 ]);
 
