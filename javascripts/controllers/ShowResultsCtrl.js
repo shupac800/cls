@@ -9,7 +9,7 @@ app.controller("MainCtrl", ["$scope","$location","getLatestFSPosts",
           $scope.cursor = cursor;
         },
         function (error) {
-          console.log("something went wrong");
+          console.log("something went wrong, couldn't load data from CL");
         }
       );
     }

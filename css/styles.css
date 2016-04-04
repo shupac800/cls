@@ -40,3 +40,26 @@ input {
 td.lastsearch, td.created, td.nextsearch {
   display:none;
 }
+
+@-webkit-keyframes flashgreen {
+    0% {
+        background-color: rgb(127, 255, 0);
+    }
+    33% {
+        background-color: rgb(127, 255, 0);
+    }
+    100% {
+        background-color: rgb(255, 255, 255);
+    }
+}
+
+.flashgreen {
+    -webkit-animation-name: flashgreen;
+    -webkit-animation-duration: 1.9s;
+    -webkit-animation-iteration-count: 1;
+    -webkit-animation-timing-function: ease-out;
+}
+
+.msgsSent {
+  background-color: #3FC;
+}

@@ -62,7 +62,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       $(rowSelector).append("<td class='created_conv'><p>" + convertTimestamp(obj[thisKey].created) +"</p></td>");
       $(rowSelector).append("<td class='lastsearch'><p>" + obj[thisKey].lastsearch +"</p></td>");
       $(rowSelector).append("<td class='lastsearch_conv'><p>" + convertTimestamp(obj[thisKey].lastsearch) +"</p></td>");
-      $(rowSelector).append("<td class='msgs_sent'><p>" + obj[thisKey].msgs_sent +"</p></td>");
+      $(rowSelector).append("<td class='msgsSent'><p>" + obj[thisKey].msgsSent +"</p></td>");
       $(rowSelector).append("<td class='delete'><p></p></td>");
       $(rowSelector).append("<td class='searchnow'><p></p></td>");
       $(rowSelector).append("<td class='nextsearch'><p>N/S</p></td>");
@@ -92,7 +92,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
                                    $(`tr#${thisKey} td.filter`).text(),
                                    $(`tr#${thisKey} td.phone`).text(),
                                    $(`tr#${thisKey} td.interval`).text(),
-                                   $(`tr#${thisKey} td.msgs_sent`).text() );
+                                   $(`tr#${thisKey} td.msgsSent`).text() );
         //console.log("retrieved from factory:",dataService.getScopeData());
         //$location.url("/main");  // switch view
         //$scope.$apply();  // not sure why this is necessary, but it is
@@ -240,9 +240,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
 
     function patchField(cellNode) {
       var id = $(cellNode).parent().attr("id");
-      console.log(cellNode.classList);
       var field = cellNode.classList[0];
-      console.log("patching field " + field + " of",`http://cls.firebaseio.com/${id}.json`);
       var newObj = {};
       newObj[field] = $(cellNode).text();
       $http.patch(`https://cls.firebaseio.com/${id}.json`,JSON.stringify(newObj))
@@ -261,7 +259,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
                             "filter": "",
                             "interval": "",
                             "lastsearch": "never",
-                            "msgs_sent": 0,
+                            "msgsSent": 0,
                             "phone": "",
                             "reported": [-1],  // contains one dummy value so it'll show up in FB
                             "searchterm": "" };
@@ -314,30 +312,46 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       var filter =     $(`tr#${key} td.filter`).text();
       var user =       $(`tr#${key} td.user`).text();
       var phone =      $(`tr#${key} td.phone`).text();
+      var city =       $(`tr#${key} td.city`).text();
 
       getLatestFSPosts.load().then(
         function(cursor) {
+          //console.log(cursor.length+" items in cursor");
           cursor = cursor.filter(function(cRow) {
             return ( cRow.title.toLowerCase().match( searchterm.toLowerCase() ) 
                    && !( cRow.title.toLowerCase().match( filter.toLowerCase() ) ) );
           });
+          //console.log("after filter, "+cursor.length+" items in cursor");
           cursor.forEach(function(cRow) {
+            console.log("calling Twilio REST API");
             console.log(`texting ${user} at ${phone} about "${cRow.title}"`);
             // if item ID isn't in the "reported" array,
+            /////////////////////////////////////////
+            ///////////////// DO REPORTED ARRAY CHECK
+            /////////////////////////////////////////
             // do Twilio REST thing for each thing in the cursor
+            var message = city + " CL alert: " + cRow.title;
+            twilio(key,message);
           });
           //$scope.cursor = cursor;  // display results
 
           // update lastsearch
           // put new time in td node
           $(`tr#${key} td.lastsearch`).text(Math.floor(Date.now() / 1000));
-          $(`tr#${key} td.lastsearch_conv`).text(convertTimestamp(Math.floor(Date.now() / 1000)));
+          $(`tr#${key} td.lastsearch_conv`).text(convertTimestamp(Math.floor(Date.now() / 1000)))
+            .addClass("flashgreen");
+          setTimeout(function() {
+            $(`tr#${key} td.lastsearch_conv`).removeClass("flashgreen");
+          }, 2000);
           // then send updated node to patchField
-          console.log("sending PatchField() this:",document.getElementById(`${key}`).querySelector("td.lastsearch"));
           patchField( document.getElementById(`${key}`).querySelector("td.lastsearch") );
           // update nextsearch cell
           $(`tr#${key} td.nextsearch`).text(Math.floor((Date.now() / 1000) + ($(`tr#${key} td.interval`).text() * 60)));
-          $(`tr#${key} td.nextsearch_conv`).text(convertTimestamp(Math.floor((Date.now() / 1000) + ($(`tr#${key} td.interval`).text() * 60))));
+          $(`tr#${key} td.nextsearch_conv`).text(convertTimestamp(Math.floor((Date.now() / 1000) + ($(`tr#${key} td.interval`).text() * 60))))
+            .addClass("flashgreen");
+          setTimeout(function() {
+            $(`tr#${key} td.nextsearch_conv`).removeClass("flashgreen");
+          }, 2000);
           // schedule nextsearch
           scheduleSearch(key);
           console.log("scheduled the next search for ",convertTimestamp(Math.floor((Date.now() / 1000) + ($(`tr#${key} td.interval`).text() * 60))));
@@ -348,22 +362,36 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       );
     }
 
-    function twilio(phone,message) {
+    function twilio(key,message) {
+      console.log("twilio-ing to phone: ","+1" + $(`tr#${key} td.phone`).text());
+      console.log("message is ",message);
       $.ajax({
         type: "POST",
+        headers: {"Authorization": "Basic " + btoa("ACda875cca4cfd121417e0d744cb52d000" + ":" + "3c6a196d2930ad0779cc7ec78ecee18b")},
         username: "ACda875cca4cfd121417e0d744cb52d000",
-        password: "AUTH_T3c6a196d2930ad0779cc7ec78ecee18bOKEN",
-        url: "https://api.twilio.com/2010-04-01/Accounts/[ACCOUNT_SID]/Messages.json",
+        password: "3c6a196d2930ad0779cc7ec78ecee18b",
+        url: "https://api.twilio.com/2010-04-01/Accounts/ACda875cca4cfd121417e0d744cb52d000/Messages",
         data: {
-          "To" : phone,
+          "To" : "+1" + $(`tr#${key} td.phone`).text(),
           "From" : "+12019032712",
           "Body" : message
         },
         success: function(data) {
-          console.log(data);
+          console.log("AJAX reports successful POST to Twilio");
+          // Update msgsSent td
+          msgs_sent_node = document.getElementById(`${key}`).querySelector("td.msgsSent");
+          var msgs_sent = parseInt(msgs_sent_node.querySelector("p").innerHTML);
+          msgs_sent++;
+          msgs_sent_node.querySelector("p").innerHTML = msgs_sent;
+          // update msgsSent record in Firebase
+          patchField(msgs_sent_node);
+          $(`tr#${key} td.msgsSent`).addClass("flashgreen");
+          setTimeout(function() {
+            $(`tr#${key} td.msgsSent`).removeClass("flashgreen");
+          }, 2000);
         },
         error: function(data) {
-          console.log(data);
+          console.log("something went awry; post to Twilio unsuccessful");
         }
       });
     }

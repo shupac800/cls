@@ -8,7 +8,6 @@ app.factory("getLatestFSPosts", function($q, $http,dataService) {
     // cursor is array that contains title, datetime, href, price, location
     // first three fields are guaranteed to be populated; last two are not
     var row = $(rawHTML).find(".row");
-    console.log("row length",row.length);
 
     for (i = 0; i < row.length; i++) {
       var title = row[i].querySelector("span #titletextonly").innerHTML;
