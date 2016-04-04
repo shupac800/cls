@@ -37,12 +37,8 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
                              "<td>run</td>" +
                              "<td>next search</td>" +
                              "</tr>" );
+          // display one row for each search saved in Firebase
           Object.keys(response.data).forEach(function(thisKey) {
-            response.data[thisKey].hcreated = response.data[thisKey].created;
-            response.data[thisKey].hlastsearch = response.data[thisKey].lastsearch;
-            // if (typeof response.data[thisKey].hlastsearch === typeof undefined) {
-            //   response.data[thisKey].hlastsearch = "never";
-            // }
             response.data[thisKey].key = thisKey;
             displayRow(response.data,thisKey);
           });
@@ -218,16 +214,71 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
         if (ke.keyCode === 13) {
           ke.stopImmediatePropagation();  // prevents "double keypress" bug
           if ($scope.editText) {  // did we enter anything in the input box?
-            // update <p> contents of previousCellNode with contents of input box
-            $(e.currentTarget).find("p").text($scope.editText);
-            // patch Firebase with changed cell contents
-            patchField(e.currentTarget);
+            if (inputIsValid(e.currentTarget,$scope.editText)) {
+              // update <p> contents of previousCellNode with contents of input box
+              $(e.currentTarget).find("p").text($scope.editText);
+              // patch Firebase with changed cell contents
+              patchField(e.currentTarget);
+            }
           }
           closePreviousCellNode(e.currentTarget);
         }
       });
     }
 
+
+    function inputIsValid(cellNode,inputText) {
+      var field = cellNode.classList[0];
+      switch (field) {
+        case "searchterm":
+          // is search term blank or all whitespace?
+          if (isEmpty(inputText)) {
+            reportErrorToDOM("Search term cannot be left blank");
+            return false;
+          }
+          return true;
+        case "phone":
+          if (inputText.length !== 10) {
+            reportErrorToDOM("Phone number must be 10 digits");
+            return false;
+          }
+          if ((inputText.charAt(0) === "0") || (inputText.charAt(0) === "1")) {
+            reportErrorToDOM("Valid 10-digit number cannot begin with 0 or 1");
+            return false;
+          }
+          return true;
+        case "interval":
+          if (!parseInt(inputText) >= 1) {
+            reportErrorToDOM("Interval must be 1 or more");
+            return false;
+          }
+          if (parseInt(inputText) < 0) {
+            reportErrorToDOM("Interval can't be less than 1");
+            return false;
+          }
+          if (parseInt(inputText) !== parseFloat(inputText)) {
+            reportErrorToDOM("Interval must be a round number, no decimals");
+            return false;
+          }
+        default:
+          return true;
+      }
+    }
+
+
+    function isEmpty(str) {
+      return str.replace(/^\s+|\s+$/g, '').length === 0;
+    }
+
+
+    function reportErrorToDOM(message) {
+      console.log("error:",message);
+      $("body").append("<div id='error'></div>");
+      $("div#error p").text(message);
+      $("div#error button").on("click",function() {
+        $("div#error").remove();
+      })
+    }
 
     function checkForOpenInput() {
       // is there an input box open somewhere in the table?
@@ -267,16 +318,16 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
 
 
     $scope.addSearch = function() {
-      var newObj = {        "user": "",
-                            "city": "",
+      var newObj = {        "user": "Shu",
+                            "city": "nashville",
                             "created": Math.floor(Date.now() / 1000),  // divide JS time by 1000 to get UNIX time
-                            "filter": "",
-                            "interval": "",
+                            "filter": "\"\"",
+                            "interval": 60,
                             "lastsearch": "never",
                             "msgsSent": 0,
-                            "phone": "",
-                            "reported": [-1],  // contains one dummy value so it'll show up in FB
-                            "searchterm": "" };
+                            "phone": "555555555",
+                            "reported": [-1],  // contains one dummy value so it'll show up in Firebase
+                            "searchterm": "???" };
       $http.post("https://cls.firebaseio.com/.json",JSON.stringify(newObj))
         .success(function(response) {
           console.log("post successful");
@@ -285,7 +336,6 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
           objForDisplay[response.name] = newObj;
           objForDisplay[response.name].hcreated = objForDisplay[response.name].created;
           objForDisplay[response.name].hlastsearch = objForDisplay[response.name].lastsearch;
-          console.log("objForDisplay",objForDisplay);
           displayRow(objForDisplay,response.name);
         }).error(function(error) {
           console.log("something went awry; post unsuccessful");

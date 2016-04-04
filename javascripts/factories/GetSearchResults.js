@@ -27,12 +27,15 @@ app.factory("getLatestFSPosts", function($q, $http,dataService) {
         loc = loc.innerHTML.replace(/[()]/g,"");
         loc = loc.slice(1,loc.length);
       }
+      var data_pid = $(row[i]).attr("data-pid");
+      var data_repost_of = $(row[i]).attr("data-repost-of");
 
       cursor.push( {title:       title,
                     href:        href,
                     datetime:    datetime,
                     price:       price,
-                    loc:         loc       } );
+                    loc:         loc,
+                    id:          data_repost_of ? data_repost_of : data_pid       } );
     }
     return cursor;
   }
@@ -47,7 +50,7 @@ app.factory("getLatestFSPosts", function($q, $http,dataService) {
           function(response) {
             var rawHTML = response.data;
             cursor = loadCursor(rawHTML);
-            console.log("I just put this shit in the cursor:",cursor);
+            console.log("I just put this data in the cursor:",cursor);
             resolve(cursor);
           },
           function(error) {
