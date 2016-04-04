@@ -59,3 +59,11 @@ td.lastsearch, td.created, td.nextsearch {
     -webkit-animation-iteration-count: 1;
     -webkit-animation-timing-function: ease-out;
 }
+
+#error {
+  background-color: #FFF7A3;
+  text-align: center;
+  height: 100px;
+  width: 200px;
+  border: 2px solid blue;
+}

@@ -1,7 +1,7 @@
 app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$location","getLatestFSPosts",
   function($scope,$http,$compile,dataService,$location,getLatestFSPosts) {
     console.log("ServerCtrl is running");
-    //$("body:not(td)").on("click",nonTDClick);
+    $("html:not(td)").on("click",nonTDClick);
 
     fetchSearchData();
     //test();
@@ -14,7 +14,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
 
     $scope.jumpToShowResultsView = function() {
       $location.url("/main");
-      $scope.$apply();
+      //$scope.$apply();
     }
 
 
@@ -166,15 +166,28 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
 
     function nonTDClick(e) {
       console.log("non td click");
-      var previousCellNode = checkForOpenInput();
-      if (previousCellNode) {
-        closePreviousCellNode(previousCellNode);
+      e.stopImmediatePropagation();
+      // do we have an input box open?
+      var nodeWithInput = checkForOpenInput();
+      console.log("nodeWithInput",nodeWithInput);
+      if (!nodeWithInput) {  // no input box is open, so there's nothing to close
+        return false;
       }
-      return;
+      if ($scope.editText) {  // did we enter anything in the input box?
+        if (inputIsValid(nodeWithInput,$scope.editText)) {
+          // update <p> contents of previousCellNode with contents of input box
+          $(nodeWithInput).find("p").text($scope.editText);
+          // patch Firebase with changed cell contents
+          patchField(nodeWithInput);
+        }
+      }
+      closePreviousCellNode(nodeWithInput);
+      return false;
     }
 
 
     function tdClick(e) {
+      e.stopImmediatePropagation();
       console.log("td click");
       // are we clicking on a td that has an input in it?
       var tdInputNode = e.currentTarget.querySelector("input");
@@ -224,6 +237,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
           closePreviousCellNode(e.currentTarget);
         }
       });
+      return false;
     }
 
 
@@ -243,7 +257,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
             return false;
           }
           if ((inputText.charAt(0) === "0") || (inputText.charAt(0) === "1")) {
-            reportErrorToDOM("Valid 10-digit number cannot begin with 0 or 1");
+            reportErrorToDOM("Valid 10-digit phone number cannot begin with 0 or 1");
             return false;
           }
           return true;
@@ -273,12 +287,13 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
 
     function reportErrorToDOM(message) {
       console.log("error:",message);
-      $("body").append("<div id='error'></div>");
+      $("div.container").append("<div id='error'><p></p><button>OK</button></div>");
       $("div#error p").text(message);
       $("div#error button").on("click",function() {
         $("div#error").remove();
-      })
+      });
     }
+
 
     function checkForOpenInput() {
       // is there an input box open somewhere in the table?

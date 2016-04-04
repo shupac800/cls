@@ -46,18 +46,15 @@ app.factory("getLatestFSPosts", function($q, $http,dataService) {
       return $q(function(resolve, reject) {
         console.log("doing CORS request");
         $http.get(`https://cors-anywhere.herokuapp.com/http://${searchData.city}.craigslist.org/search/sss`)
-        .then(
-          function(response) {
+        .then(function(response) {
             var rawHTML = response.data;
             cursor = loadCursor(rawHTML);
             console.log("I just put this data in the cursor:",cursor);
             resolve(cursor);
-          },
-          function(error) {
+        }, function(error) {
             console.log("uh-oh");
             reject(error);
-          }
-        );
+        });
       });
     }
   }
