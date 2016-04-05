@@ -1,0 +1,156 @@
+
+<!DOCTYPE html>
+
+<!--
+  Google HTML5 slide template
+
+  Authors: Luke Mahé (code)
+           Marcin Wichary (code and design)
+           
+           Dominic Mazzoni (browser compatibility)
+           Charles Chen (ChromeVox support)
+
+  URL: http://code.google.com/p/html5slides/
+-->
+
+<html>
+  <head>
+    <title>Capstone Presentation</title>
+
+    <meta charset='utf-8'>
+    <script
+      src='http://html5slides.googlecode.com/svn/trunk/slides.js'></script>
+  </head>
+  
+  <style>
+
+    h1 {
+      margin-top: 50px !important;
+    }
+
+    ul li {
+      font-size: 1.3em;
+      line-height: 120%;
+    }
+
+    ul>li>ul>li {
+      font-size: 0.8em;
+      margin: 0;
+      line-height: 120%;
+    }
+    
+    
+  </style>
+
+  <body style='display: none'>
+
+    <section class='slides layout-regular template-default'>
+      
+      <!-- Your slides (<article>s) go here. Delete or comment out the
+           slides below. -->
+        
+        
+      
+
+      <article class="nobackground">
+        <h1 style="border-bottom:1px solid black; padding-bottom:2px">
+          CL Flunky
+        </h1>
+        <br>
+        <h3>
+          Automated Craigslist Data Scraping and Notification
+        </h3>
+        <p>
+          David Shuman
+          <br>
+          NSS Cohort 12
+          <br>
+          April 5, 2016
+        </p>
+      </article>
+      
+      <article class="nobackground">
+        <h1>
+          Project Goals:
+        </h1>
+        <ul>
+          <li>
+            Pull data from website that provides no API
+          </li>
+          <li>
+            Schedule repeated searches at short intervals
+          </li>
+          <li>
+            Manage saved searches with CRUD application
+          </li>
+          <li>
+            Prompt notification of search hits via SMS
+          </li>
+        </ul>
+      </article>
+
+
+      <article class="nobackground">
+        <h1>
+          Principal Components
+        </h1>
+        <ul>
+          <li>
+            Firebase API
+            <ul>
+              <li>User authentication
+              <li>Store saved search parameters
+              <li>Securely store Twilio username and password
+            </ul>
+          </li>
+          <li>
+            Twilio REST API accepts outgoing text messages via POST
+          </li>
+          <li>
+            Original code harvests data from last 100 posts to Craigslist "for sale" page
+          </li>
+          <li>
+            CRUD application to run, schedule, and manage multiple searches
+          </li>
+        </ul>
+      </article> 
+
+      <article class="nobackground">
+        <h1>
+          Lessons Learned:
+        </h1>
+        <ul>
+          <li>
+            Maintain realistic expectations
+          </li>
+          <li>
+            Manage time; prioritize
+          </li>
+          <li>
+            Write pseudo-code!
+          </li>
+          <li>
+            Don't be afraid to junk code that is more easily rewritten than fixed
+          </li>
+        </ul>
+      </article>
+
+      
+      <article class="nobackground">
+        <h1>
+        Questions?
+        </h1>
+        <ul style="list-style-type:none !important">
+          <li>
+            davidshuman@gmail.com
+          </li>
+          <li>
+            http://github.com/shupac800/cls
+          </li>
+        </ul>
+      </article>
+
+    </section>
+
+  </body>
+</html>

@@ -11,6 +11,7 @@ table {
 td {
   border: 1px solid gray;
   text-align: center;
+  padding: 0px 5px;
 }
 
 td.delete {
@@ -67,4 +68,17 @@ td.lastsearch, td.created, td.nextsearch {
   height: 100px;
   width: 200px;
   border: 2px solid blue;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 10px 20px;
+  border-radius: 10px;
+}
+
+#email, #password {
+  min-width: 266px;
+  padding: 10px 5px;
+  margin: 10px 20px;
+  font-size: 1.7em;
 }

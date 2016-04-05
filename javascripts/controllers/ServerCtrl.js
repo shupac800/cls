@@ -86,12 +86,16 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       // add "delete" graphic to delete field
       $(`tr#${thisKey} td.delete`).html("<img src='redx.png'>");
       // add listener to "delete" field
-      $(`tr#${thisKey} td.delete`).on("click",deleteRow);
+      $(`tr#${thisKey} td.delete`).on("click",function(e) {
+        e.stopImmediatePropagation();
+        deleteRow(e);
+      }); 
 
       // add "search" graphic to search field
       $(`tr#${thisKey} td.searchnow`).html("<img src='Search.png'>");
       // add listener to "search" field
-      $(`tr#${thisKey} td.searchnow`).on("click",function() {
+      $(`tr#${thisKey} td.searchnow`).on("click",function(e) {
+        e.stopImmediatePropagation();
         // store search parameters in dataService factory
         dataService.setSearchData( $(`tr#${thisKey} td.searchterm`).text(),
                                    $(`tr#${thisKey} td.city`).text(),
@@ -104,10 +108,9 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       });
 
       // add listener to "nextsearch_conv" field
-      $(`tr#${thisKey} td.nextsearch_conv`).on("click",function() {
-        console.log("cleeeck");
+      $(`tr#${thisKey} td.nextsearch_conv`).on("click",function(e) {
+        e.stopImmediatePropagation();
         var ns = $(`tr#${thisKey} td.nextsearch_conv`);
-        console.log("bg color is",$(ns).css("background-color"));
         if ($(ns).css("background-color") === "rgb(127, 255, 0)") {  //chartreuse
           console.log("green");
           postponeSearch(thisKey);
@@ -187,8 +190,8 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
 
 
     function tdClick(e) {
-      e.stopImmediatePropagation();
       console.log("td click");
+      e.stopImmediatePropagation();
       // are we clicking on a td that has an input in it?
       var tdInputNode = e.currentTarget.querySelector("input");
       console.log("tdInputNode",tdInputNode);
@@ -344,7 +347,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
                             "msgsSent": 0,
                             "phone": "555555555",
                             //"reported": [-1],  // contains one dummy value so it'll show up in Firebase
-                            "searchterm": "<none>" };
+                            "searchterm": "\"\"" };
       $http.post("https://cls.firebaseio.com/searches/.json",JSON.stringify(newObj))
         .success(function(response) {
           console.log("post successful");
@@ -402,12 +405,12 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
 
       getLatestFSPosts.load().then(
         function(cursor) {
-          //console.log(cursor.length+" items in cursor");
+          console.log(cursor.length+" items in cursor");
           cursor = cursor.filter(function(cRow) {
             return ( cRow.title.toLowerCase().match( searchterm.toLowerCase() ) 
                    && !( cRow.title.toLowerCase().match( filter.toLowerCase() ) ) );
           });
-          //console.log("after filter, "+cursor.length+" items in cursor");
+          console.log("after filter, "+cursor.length+" items in cursor");
           cursor.forEach(function(cRow) {
             console.log("calling Twilio REST API");
             console.log(`texting ${user} at ${phone} about "${cRow.title}"`);
@@ -437,11 +440,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
           patchField( document.getElementById(`${key}`).querySelector("td.lastsearch") );
           // update nextsearch cell
           $(`tr#${key} td.nextsearch`).text(Math.floor((Date.now() / 1000) + ($(`tr#${key} td.interval`).text() * 60)));
-          $(`tr#${key} td.nextsearch_conv`).text(convertTimestamp(Math.floor((Date.now() / 1000) + ($(`tr#${key} td.interval`).text() * 60))))
-            .addClass("flashgreen");
-          setTimeout(function() {
-            $(`tr#${key} td.nextsearch_conv`).removeClass("flashgreen");
-          }, 2000);
+          $(`tr#${key} td.nextsearch_conv`).text(convertTimestamp(Math.floor((Date.now() / 1000) + ($(`tr#${key} td.interval`).text() * 60))));
           // schedule nextsearch
           scheduleSearch(key);
           console.log("scheduled the next search for ",convertTimestamp(Math.floor((Date.now() / 1000) + ($(`tr#${key} td.interval`).text() * 60))));
