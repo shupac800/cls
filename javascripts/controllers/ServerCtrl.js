@@ -96,6 +96,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
       // add listener to "search" field
       $(`tr#${thisKey} td.searchnow`).on("click",function(e) {
         e.stopImmediatePropagation();
+        $("body").trigger("click");  // trigger non-td click to close any open input boxes
         // store search parameters in dataService factory
         dataService.setSearchData( $(`tr#${thisKey} td.searchterm`).text(),
                                    $(`tr#${thisKey} td.city`).text(),
@@ -112,10 +113,8 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
         e.stopImmediatePropagation();
         var ns = $(`tr#${thisKey} td.nextsearch_conv`);
         if ($(ns).css("background-color") === "rgb(127, 255, 0)") {  //chartreuse
-          console.log("green");
           postponeSearch(thisKey);
         } else if ($(ns).css("background-color") === "rgb(255, 255, 0)") {  // yellow
-          console.log("yella");
           unPostponeSearch(thisKey);
         }
       });
@@ -244,7 +243,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
     }
 
 
-    function inputIsValid(cellNode,inputText) {
+    function inputIsValid(cellNode,inputText) {  // rewrite this using modal (jQuery-ui?)
       var field = cellNode.classList[0];
       switch (field) {
         case "searchterm":
@@ -283,7 +282,7 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
     }
 
 
-    function isEmpty(str) {
+    function isEmpty(str) {  // checks for whitespace-only
       return str.replace(/^\s+|\s+$/g, '').length === 0;
     }
 

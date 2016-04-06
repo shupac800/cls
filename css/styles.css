@@ -1,5 +1,9 @@
 tbody tr:nth-child(odd) {
-  background-color: #CCC;
+  background-color: #FEE6E6;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #DDFFDD;
 }
 
 table {
@@ -11,7 +15,13 @@ table {
 td {
   border: 1px solid gray;
   text-align: center;
+  margin: 0;
   padding: 0px 5px;
+}
+
+td p{
+  margin: 0;
+  padding: 2px;
 }
 
 td.delete {
@@ -26,10 +36,6 @@ td.delete img {
 td.searchnow img {
   height: 25px;
   width: 25px;
-}
-
-tr#headerRow {
-  font-weight: bold;
 }
 
 input {
@@ -81,4 +87,13 @@ button {
   padding: 10px 5px;
   margin: 10px 20px;
   font-size: 1.7em;
+}
+
+tr#headerRow {
+  background-color: #DDD;
+  font-weight: bold;
+}
+
+tr#headerRow td {
+  padding: 2px;
 }
