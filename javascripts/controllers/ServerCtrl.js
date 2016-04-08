@@ -1,7 +1,7 @@
 app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$location","getLatestFSPosts",
   function($scope,$http,$compile,dataService,$location,getLatestFSPosts) {
-    console.log("ServerCtrl is running");
     $("html:not(td)").on("click",nonTDClick);
+    console.log("ServerCtrl is running");
 
     fetchSearchData();
     //test();
