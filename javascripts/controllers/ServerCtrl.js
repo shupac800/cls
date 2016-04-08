@@ -1,3 +1,5 @@
+// ServerCtrl.js
+
 app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$location","getLatestFSPosts",
   function($scope,$http,$compile,dataService,$location,getLatestFSPosts) {
     $("html:not(td)").on("click",nonTDClick);
