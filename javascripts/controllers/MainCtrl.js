@@ -1,3 +1,5 @@
+// MainCtrl.js
+
 app.controller("MainCtrl", ["$scope","getLatestFSPosts","dataService","$location",
   function($scope,getLatestFSPosts,dataService,$location) {
     console.log("MainCtrl is running");
