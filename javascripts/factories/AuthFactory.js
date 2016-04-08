@@ -1,3 +1,5 @@
+// AuthFactory.js
+
 app.factory("authFactory", function() {
   var ref = new Firebase("https://cls.firebaseio.com");
 

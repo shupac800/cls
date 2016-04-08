@@ -1,3 +1,5 @@
+// GetSearchResults.js
+
 app.factory("getLatestFSPosts", function($q, $http,dataService) {
 
   var searchData = dataService.getSearchData();  // get parameters from dataService factory
