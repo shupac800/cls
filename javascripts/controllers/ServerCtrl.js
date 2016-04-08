@@ -4,13 +4,6 @@ app.controller("ServerCtrl", ["$scope","$http","$compile","dataService","$locati
     console.log("ServerCtrl is running");
 
     fetchSearchData();
-    //test();
-
-
-    function test() {
-    
-    }
-
 
     $scope.jumpToShowResultsView = function() {
       $location.url("/main");
